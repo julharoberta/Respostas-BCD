@@ -1,0 +1,196 @@
+1. Abra o script de carga do banco e avalie as instruções.
+
+2. Você é capaz de compreender as instruções do script?
+
+Sim
+
+3. Consegue identificar algum problema no script? Se sim, qual?
+
+
+4. Você é capaz de executar o MySQL Server e identificar seus parâmetros de
+inicialização?
+
+Sim
+
+5. Você é capaz de conectar ao MySQL Server via CMD ou Workbench?
+
+Sim
+
+6. Você é capaz de realizar a carga do script em seu ambiente de desenvolvimento?
+Sim
+
+
+7. Após a carga, você é capaz de avaliar se o modelo físico corresponde ao conteúdo
+de carga?
+
+Sim
+
+8. (DQL) Selecione todos os clientes.
+
+SELECT * FROM 
+	cliente;
+
+9. (DQL) Levante a quantidade de vendas registradas no sistema.
+
+SELECT  COUNT(venda_id)total_venda FROM venda;
+
+10. (DQL) Selecione o nome e o endereço de todos os clientes. Ordenar a saída pelo
+nome do cliente (CRESCENTE) e pelo endereço (DECRESCENTE).
+
+SELECT nome, endereco
+FROM cliente
+ORDER BY nome ASC, endereco DESC;
+
+11. (DQL) Selecione o nome e o cargo de todos os funcionários.
+
+SELECT nome, cargo
+FROM funcionario;
+
+12. Selecione os cargos (ÚNICOS) existentes na revenda.
+
+SELECT DISTINCT cargo
+FROM funcionario;
+
+13. (DQL) Selecione o modelo e a marca de todos os veículos.
+
+SELECT modelo, marca
+FROM veiculo;
+
+14. (DQL) Selecione os funcionários que foram contratados a partir de 2022. A saída deve
+ser ordenada pela data de contratação.
+
+SELECT *
+FROM funcionario
+WHERE data_contratacao >= '2023-01-01'
+ORDER BY data_contratacao;
+
+15. (DQL) Selecione as manutenções onde o custo é maior do que 200.00 e menor do
+350.00 (NÃO INCLUSIVOS). Colocar a saída ordenada do maior custo para o menor
+custo.
+
+SELECT *
+FROM manutencao
+WHERE custo > 200.00 AND custo < 350.00
+ORDER BY custo DESC;
+
+16. (DQL) Selecione as manutenções onde o custo é maior ou igual a 200.00 e menor ou
+igual a 350.00 (INCLUSIVOS). Colocar a saída ordenada do maior custo para o menor
+custo.
+
+SELECT *
+FROM manutencao
+WHERE custo >= 200.00 AND custo <= 350.00
+ORDER BY custo DESC;
+
+17. (DQL) Selecione os clientes que moram em uma Rua que contenha a letra ‘A’ no
+nome.
+
+SELECT *
+FROM cliente
+WHERE endereco LIKE '%Rua%' AND endereco LIKE '%A%';
+
+18. (DQL) Selecione o nome e o endereço de todos os clientes que compraram veículos.
+A saída deve estar ordenada pelo nome do cliente.
+
+SELECT nome,endereco
+from cliente
+ORDER BY nome ASC;
+
+19. (DQL) Selecione o modelo, a marca, o ano e o fornecedor de todos os veículos com
+preço maior que a média de preço. Se o veículo não possuir fornecedor, deve ser
+exibido “-“ na coluna.
+
+SELECT
+	v.modelo,
+    v.marca,
+    v.ano,
+    coalesce(f.nome, '-') as fornecedor
+FROM
+	veiculo v 
+LEFT JOIN
+	fornecedor f on v.fornecedor_id - f.fornecedor_id
+WHERE
+	v.preco > (
+		SELECT
+			AVG(preco)
+		FROM
+			veiculo
+	);
+
+20. (DQL-VIEW) Selecione o nome do funcionário, a data de venda, o valor de venda e o
+veículo de todas as vendas realizadas por funcionários com salário maior que a
+média de salário. Crie uma VIEW chamada vw_vendas_func_salario para esse caso.
+
+CREATE VIEW vw_vendas_func_salario AS
+SELECT 
+	f.nome AS funcionario,
+    v.data_venda,
+    v.valor_venda,
+    ve.modelo AS veiculo
+FROM 
+    venda v
+JOIN 
+    funcionario f ON f.funcionario_id = v.funcionarios_id
+JOIN
+	veiculo ve ON ve.veiculo_id = v.veiculo_id
+WHERE 
+    f.salario > (
+		SELECT
+			AVG(salario)
+		FROM
+			funcionario
+	)
+ORDER BY
+	data_venda DESC;
+
+
+21. (DQL) Selecione os veículos que não têm manutenções registradas.
+
+SELECT
+	v.veiculo_is AS id,
+    v.modelo AS veiculo,
+    COALESCE(m.data_manutencao, '-') AS data_manutencao
+FROM
+	 veiculo v
+LEFT JOIN
+	manutencao m ON v.veiculo_id = m.veiculo_id
+WHERE
+	m.veiculo_id IS NULL
+ORDER BY
+	id DESC;
+
+22. (DQL) Selecione os clientes que não realizaram nenhuma compra.
+
+SELECT
+    DISTINCT(c.nome),
+    v.data_venda
+FROM
+    cliente c,
+    venda v
+WHERE
+    NOT EXISTS (
+        SELECT 1
+        FROM venda v
+        WHERE v.cliente_id = c.cliente_id
+    );
+---
+
+23. (DQL) Selecione os clientes que compraram veículos de um funcionário com
+determinado cargo.
+
+
+24. (DDL) Existe algum tipo de anomalia na tabela cliente? Se sim, qual é o ajuste que
+deve ser aplicado (considerar as formas normais)?
+
+- Não há anomalias na tabela "cliente", cada campo possui seus valores indivisiveis e
+não há repetições de dados(primeira forma normal), todos os campos dependem da chave primária (segunda forma normal) e não há dependências funcionais entre campos que que não passem pela chave primária.
+
+25. (DDL) Existe algum tipo de anomalia na tabela funcionario? Se sim, qual é o ajuste
+que deve ser aplicado (considerar as formas normais)?
+
+A tabela "funcionario" viola a 3ª Forma Normal, pois a informação sobre o cargo não depende diretamente da identidade do funcionário que no caso é a chave primária, mas sim de um departamento ao qual ele pertence. Para normalizar a tabela funcionario, é necessário criar uma nova tabela chamada "departamento", ,com os campos
+"departamento_id" como chave primária e "nome_departamento"
+, em seguida remover o
+campo departamento da tabela "funcionario" e definir como chave estrangeira referenciando
+a chave primária "departamento_id" da tabela departamento.
+
